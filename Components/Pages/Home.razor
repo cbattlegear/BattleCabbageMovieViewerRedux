@@ -1,0 +1,295 @@
+﻿@page "/"
+@using BattleCabbageMovieViewer.Models
+@using BattleCabbageMovieViewer.Services
+@inject IMovieApiService MovieApi
+@rendermode InteractiveServer
+
+<PageTitle>Battle Cabbage Movies</PageTitle>
+
+<div class="home-container">
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading movies...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Featured Random Movies Section -->
+        <section class="featured-section mb-5">
+            <h2 class="section-title">
+                <span class="bi bi-stars me-2"></span>Featured Movies
+            </h2>
+            <div class="row g-4">
+                @foreach (var movie in _randomMovies)
+                {
+                    <div class="col-md-4">
+                        <div class="featured-card h-100">
+                            <div class="poster-container">
+                                @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                                {
+                                    <img src="@movie.FullPosterUrl" alt="@movie.Title" class="featured-poster" />
+                                }
+                                else
+                                {
+                                    <div class="no-poster">
+                                        <span class="bi bi-film"></span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(movie.MpaaRating))
+                                {
+                                    <span class="rating-badge">@movie.MpaaRating</span>
+                                }
+                            </div>
+                            <div class="featured-content">
+                                <h3 class="movie-title">@movie.Title</h3>
+                                @if (!string.IsNullOrEmpty(movie.Tagline))
+                                {
+                                    <p class="tagline">@movie.Tagline</p>
+                                }
+                                @if (!string.IsNullOrEmpty(movie.Genre))
+                                {
+                                    <span class="genre-tag">@movie.Genre</span>
+                                }
+                                @if (movie.AverageScore.HasValue)
+                                {
+                                    <div class="score">
+                                        <span class="bi bi-star-fill text-warning"></span>
+                                        @movie.AverageScore.Value.ToString("F1")
+                                    </div>
+                                }
+                                <p class="description">@TruncateText(movie.Description, 150)</p>
+                                <a href="/movies/@movie.MovieId" class="btn btn-outline-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <div class="row">
+            <!-- Top Rated Movies -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-trophy-fill text-warning me-2"></span>Top Rated
+                    </h3>
+                    <div class="movie-list">
+                        @foreach (var movie in _topRatedMovies)
+                        {
+                            <a href="/movies/@movie.MovieId" class="movie-list-item">
+                                <div class="mini-poster">
+                                    @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                                    {
+                                        <img src="@movie.FullPosterUrl" alt="@movie.Title" />
+                                    }
+                                    else
+                                    {
+                                        <span class="bi bi-film"></span>
+                                    }
+                                </div>
+                                <div class="movie-info">
+                                    <span class="movie-name">@movie.Title</span>
+                                    @if (movie.AverageScore.HasValue)
+                                    {
+                                        <span class="movie-score text-success">
+                                            <span class="bi bi-star-fill"></span> @movie.AverageScore.Value.ToString("F1")
+                                        </span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Worst Rated Movies -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-emoji-frown-fill text-danger me-2"></span>Worst Rated
+                    </h3>
+                    <div class="movie-list">
+                        @foreach (var movie in _worstRatedMovies)
+                        {
+                            <a href="/movies/@movie.MovieId" class="movie-list-item">
+                                <div class="mini-poster">
+                                    @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                                    {
+                                        <img src="@movie.FullPosterUrl" alt="@movie.Title" />
+                                    }
+                                    else
+                                    {
+                                        <span class="bi bi-film"></span>
+                                    }
+                                </div>
+                                <div class="movie-info">
+                                    <span class="movie-name">@movie.Title</span>
+                                    @if (movie.AverageScore.HasValue)
+                                    {
+                                        <span class="movie-score text-danger">
+                                            <span class="bi bi-star-fill"></span> @movie.AverageScore.Value.ToString("F1")
+                                        </span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Movies -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-clock-fill text-info me-2"></span>Most Recent
+                    </h3>
+                    <div class="movie-list">
+                        @foreach (var movie in _recentMovies)
+                        {
+                            <a href="/movies/@movie.MovieId" class="movie-list-item">
+                                <div class="mini-poster">
+                                    @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                                    {
+                                        <img src="@movie.FullPosterUrl" alt="@movie.Title" />
+                                    }
+                                    else
+                                    {
+                                        <span class="bi bi-film"></span>
+                                    }
+                                </div>
+                                <div class="movie-info">
+                                    <span class="movie-name">@movie.Title</span>
+                                    @if (movie.ReleaseDate.HasValue)
+                                    {
+                                        <span class="movie-date text-muted">
+                                            @movie.ReleaseDate.Value.ToString("MMM yyyy")
+                                        </span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Genres -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-collection-fill text-primary me-2"></span>Top Genres
+                    </h3>
+                    <div class="genre-list">
+                        @foreach (var genre in _topGenres)
+                        {
+                            <a href="/movies?genre=@Uri.EscapeDataString(genre.Genre)" class="genre-item">
+                                <span class="genre-name">@genre.Genre</span>
+                                <span class="genre-count">@genre.MovieCount movies</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Top Actors -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-person-fill text-success me-2"></span>Top Actors
+                    </h3>
+                    <div class="person-list">
+                        @foreach (var actor in _topActors)
+                        {
+                            <div class="person-item">
+                                <span class="bi bi-person-circle person-icon"></span>
+                                <div class="person-info">
+                                    <span class="person-name">@actor.Actor</span>
+                                    <span class="person-count">@actor.MovieCount movies</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Directors -->
+            <div class="col-lg-6 mb-4">
+                <div class="content-card">
+                    <h3 class="card-section-title">
+                        <span class="bi bi-camera-reels-fill text-secondary me-2"></span>Top Directors
+                    </h3>
+                    <div class="person-list">
+                        @foreach (var director in _topDirectors)
+                        {
+                            <div class="person-item">
+                                <span class="bi bi-megaphone-fill person-icon"></span>
+                                <div class="person-info">
+                                    <span class="person-name">@director.Director</span>
+                                    <span class="person-count">@director.MovieCount movies</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private List<MovieResponse> _randomMovies = [];
+    private List<MovieResponse> _topRatedMovies = [];
+    private List<MovieResponse> _worstRatedMovies = [];
+    private List<MovieResponse> _recentMovies = [];
+    private List<TopGenreResponse> _topGenres = [];
+    private List<TopActorResponse> _topActors = [];
+    private List<TopDirectorResponse> _topDirectors = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load all data in parallel for better performance
+            var randomTask = MovieApi.GetRandomMoviesAsync();
+            var topRatedTask = MovieApi.GetTopRatedMoviesAsync();
+            var worstRatedTask = MovieApi.GetWorstRatedMoviesAsync();
+            var recentTask = MovieApi.GetRecentMoviesAsync();
+            var topGenresTask = MovieApi.GetTopGenresAsync();
+            var topActorsTask = MovieApi.GetTopActorsAsync();
+            var topDirectorsTask = MovieApi.GetTopDirectorsAsync();
+
+            await Task.WhenAll(randomTask, topRatedTask, worstRatedTask, recentTask, 
+                topGenresTask, topActorsTask, topDirectorsTask);
+
+            _randomMovies = await randomTask;
+            _topRatedMovies = await topRatedTask;
+            _worstRatedMovies = await worstRatedTask;
+            _recentMovies = await recentTask;
+            _topGenres = await topGenresTask;
+            _topActors = await topActorsTask;
+            _topDirectors = await topDirectorsTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading home page data: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private static string TruncateText(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        return text.Length <= maxLength ? text : text[..maxLength] + "...";
+    }
+}

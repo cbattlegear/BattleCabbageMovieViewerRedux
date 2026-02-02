@@ -1,0 +1,111 @@
+@page "/directors"
+@using BattleCabbageMovieViewer.Models
+@using BattleCabbageMovieViewer.Services
+@inject IMovieApiService MovieApi
+@rendermode InteractiveServer
+
+<PageTitle>Directors - Battle Cabbage</PageTitle>
+
+<div class="list-page">
+    <div class="page-header">
+        <h1>
+            <span class="bi bi-camera-reels-fill me-2"></span>Directors
+        </h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="items-grid">
+            @foreach (var director in _directors)
+            {
+                <div class="item-card">
+                    <div class="item-icon">
+                        <span class="bi bi-megaphone-fill"></span>
+                    </div>
+                    <div class="item-content">
+                        <h5 class="item-name">@director.Director</h5>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="PreviousPage" disabled="@(_currentPage == 1)">
+                            <span class="bi bi-chevron-left"></span> Previous
+                        </button>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">Page @_currentPage</span>
+                    </li>
+                    <li class="page-item @(!_hasMore ? "disabled" : "")">
+                        <button class="page-link" @onclick="NextPage" disabled="@(!_hasMore)">
+                            Next <span class="bi bi-chevron-right"></span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@code {
+    private List<DirectorResponse> _directors = [];
+    private bool _isLoading = true;
+    private int _currentPage = 1;
+    private const int PageSize = 50;
+    private bool _hasMore = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        try
+        {
+            var skip = (_currentPage - 1) * PageSize;
+            _directors = await MovieApi.GetDirectorsAsync(skip, PageSize + 1);
+            _hasMore = _directors.Count > PageSize;
+            if (_hasMore)
+            {
+                _directors = _directors.Take(PageSize).ToList();
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_currentPage > 1)
+        {
+            _currentPage--;
+            await LoadData();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (_hasMore)
+        {
+            _currentPage++;
+            await LoadData();
+        }
+    }
+}

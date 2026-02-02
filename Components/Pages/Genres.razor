@@ -1,0 +1,90 @@
+@page "/genres"
+@using BattleCabbageMovieViewer.Models
+@using BattleCabbageMovieViewer.Services
+@inject IMovieApiService MovieApi
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Genres - Battle Cabbage</PageTitle>
+
+<div class="list-page">
+    <div class="page-header">
+        <h1>
+            <span class="bi bi-collection-fill me-2"></span>Genres
+        </h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="genres-grid">
+            @foreach (var genre in _genres)
+            {
+                <div class="genre-card" @onclick="() => BrowseGenre(genre.Genre)">
+                    <div class="genre-icon">
+                        <span class="bi @GetGenreIcon(genre.Genre)"></span>
+                    </div>
+                    <div class="genre-content">
+                        <h4 class="genre-name">@genre.Genre</h4>
+                        <p class="genre-description">Browse movies in this genre</p>
+                    </div>
+                    <span class="bi bi-chevron-right genre-arrow"></span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<GenreResponse> _genres = [];
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _genres = await MovieApi.GetGenresAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void BrowseGenre(string genre)
+    {
+        Navigation.NavigateTo($"/movies?genre={Uri.EscapeDataString(genre)}");
+    }
+
+    private static string GetGenreIcon(string genre)
+    {
+        return genre.ToLower() switch
+        {
+            "action" => "bi-lightning-fill",
+            "adventure" => "bi-compass-fill",
+            "comedy" => "bi-emoji-laughing-fill",
+            "drama" => "bi-mask",
+            "horror" => "bi-bug-fill",
+            "sci-fi" or "science fiction" => "bi-rocket-takeoff-fill",
+            "romance" => "bi-heart-fill",
+            "thriller" => "bi-exclamation-triangle-fill",
+            "animation" => "bi-brush-fill",
+            "documentary" => "bi-camera-video-fill",
+            "fantasy" => "bi-magic",
+            "mystery" => "bi-search",
+            "crime" => "bi-shield-exclamation",
+            "western" => "bi-sunrise-fill",
+            "musical" => "bi-music-note-beamed",
+            "war" => "bi-shield-fill",
+            "family" => "bi-house-heart-fill",
+            _ => "bi-film"
+        };
+    }
+}

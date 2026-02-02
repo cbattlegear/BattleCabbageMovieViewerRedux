@@ -1,0 +1,313 @@
+@page "/movies"
+@page "/movies/{MovieId:int}"
+@using BattleCabbageMovieViewer.Models
+@using BattleCabbageMovieViewer.Services
+@using Microsoft.AspNetCore.WebUtilities
+@inject IMovieApiService MovieApi
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(_selectedMovie != null ? _selectedMovie.Title : "Movies") - Battle Cabbage</PageTitle>
+
+@if (_selectedMovie != null)
+{
+    <!-- Movie Detail View -->
+    <div class="movie-detail">
+        <button class="btn btn-outline-secondary mb-4" @onclick="BackToList">
+            <span class="bi bi-arrow-left me-2"></span>Back to Movies
+        </button>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="poster-large">
+                    @if (!string.IsNullOrEmpty(_selectedMovie.FullPosterUrl))
+                    {
+                        <img src="@_selectedMovie.FullPosterUrl" alt="@_selectedMovie.Title" />
+                    }
+                    else
+                    {
+                        <div class="no-poster-large">
+                            <span class="bi bi-film"></span>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-md-8">
+                <h1 class="movie-detail-title">@_selectedMovie.Title</h1>
+                
+                @if (!string.IsNullOrEmpty(_selectedMovie.Tagline))
+                {
+                    <p class="movie-tagline">@_selectedMovie.Tagline</p>
+                }
+
+                <div class="movie-meta">
+                    @if (!string.IsNullOrEmpty(_selectedMovie.MpaaRating))
+                    {
+                        <span class="meta-badge rating">@_selectedMovie.MpaaRating</span>
+                    }
+                    @if (!string.IsNullOrEmpty(_selectedMovie.Genre))
+                    {
+                        <span class="meta-badge genre">@_selectedMovie.Genre</span>
+                    }
+                    @if (_selectedMovie.ReleaseDate.HasValue)
+                    {
+                        <span class="meta-badge date">
+                            <span class="bi bi-calendar me-1"></span>
+                            @_selectedMovie.ReleaseDate.Value.ToString("MMMM d, yyyy")
+                        </span>
+                    }
+                    @if (_selectedMovie.AverageScore.HasValue)
+                    {
+                        <span class="meta-badge score">
+                            <span class="bi bi-star-fill text-warning me-1"></span>
+                            @_selectedMovie.AverageScore.Value.ToString("F1")
+                        </span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(_selectedMovie.Description))
+                {
+                    <div class="movie-description">
+                        <h4>Description</h4>
+                        <p>@_selectedMovie.Description</p>
+                    </div>
+                }
+
+                @if (_selectedMovie.Directors.Count > 0)
+                {
+                    <div class="movie-credits">
+                        <h4>Directors</h4>
+                        <div class="credits-list">
+                            @foreach (var director in _selectedMovie.Directors)
+                            {
+                                <span class="credit-item">@director.Director</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (_selectedMovie.Actors.Count > 0)
+                {
+                    <div class="movie-credits">
+                        <h4>Cast</h4>
+                        <div class="credits-list">
+                            @foreach (var actor in _selectedMovie.Actors)
+                            {
+                                <span class="credit-item">@actor.Actor</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (_selectedMovie.Reviews.Count > 0)
+        {
+            <div class="reviews-section mt-5">
+                <h3>Critic Reviews</h3>
+                <div class="reviews-grid">
+                    @foreach (var review in _selectedMovie.Reviews)
+                    {
+                        <div class="review-card">
+                            @if (review.CriticScore.HasValue)
+                            {
+                                <div class="review-score @GetScoreClass(review.CriticScore.Value)">
+                                    @review.CriticScore.Value.ToString("F0")
+                                </div>
+                            }
+                            <p class="review-text">@review.CriticReview</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <!-- Movies List View -->
+    <div class="movies-list-page">
+        <div class="page-header">
+            <h1>
+                <span class="bi bi-film me-2"></span>Movies
+                @if (!string.IsNullOrEmpty(_genreFilter))
+                {
+                    <small class="text-muted">in @_genreFilter</small>
+                }
+            </h1>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="movies-grid">
+                @foreach (var movie in _movies)
+                {
+                    <div class="movie-card" @onclick="() => ViewMovie(movie.MovieId)">
+                        <div class="movie-poster">
+                            @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
+                            {
+                                <img src="@movie.FullPosterUrl" alt="@movie.Title" />
+                            }
+                            else
+                            {
+                                <div class="no-poster">
+                                    <span class="bi bi-film"></span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(movie.MpaaRating))
+                            {
+                                <span class="rating-badge">@movie.MpaaRating</span>
+                            }
+                        </div>
+                        <div class="movie-card-content">
+                            <h5 class="movie-card-title">@movie.Title</h5>
+                            <div class="movie-card-meta">
+                                @if (!string.IsNullOrEmpty(movie.Genre))
+                                {
+                                    <span class="genre-tag">@movie.Genre</span>
+                                }
+                                @if (movie.AverageScore.HasValue)
+                                {
+                                    <span class="score-tag">
+                                        <span class="bi bi-star-fill"></span>
+                                        @movie.AverageScore.Value.ToString("F1")
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="PreviousPage" disabled="@(_currentPage == 1)">
+                                <span class="bi bi-chevron-left"></span> Previous
+                            </button>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link">Page @_currentPage</span>
+                        </li>
+                        <li class="page-item @(!_hasMore ? "disabled" : "")">
+                            <button class="page-link" @onclick="NextPage" disabled="@(!_hasMore)">
+                                Next <span class="bi bi-chevron-right"></span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? MovieId { get; set; }
+
+    private List<MovieResponse> _movies = [];
+    private MovieResponse? _selectedMovie;
+    private bool _isLoading = true;
+    private int _currentPage = 1;
+    private const int PageSize = 12;
+    private bool _hasMore = true;
+    private string? _genreFilter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("genre", out var genre))
+        {
+            _genreFilter = genre.ToString();
+        }
+        
+        await LoadData();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (MovieId.HasValue)
+        {
+            await LoadMovieDetail(MovieId.Value);
+        }
+        else
+        {
+            _selectedMovie = null;
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        try
+        {
+            var skip = (_currentPage - 1) * PageSize;
+            _movies = await MovieApi.GetMoviesAsync(skip, PageSize + 1, _genreFilter);
+            _hasMore = _movies.Count > PageSize;
+            if (_hasMore)
+            {
+                _movies = _movies.Take(PageSize).ToList();
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadMovieDetail(int movieId)
+    {
+        _selectedMovie = await MovieApi.GetMovieAsync(movieId);
+    }
+
+    private void ViewMovie(int? movieId)
+    {
+        if (movieId.HasValue)
+        {
+            Navigation.NavigateTo($"/movies/{movieId}");
+        }
+    }
+
+    private void BackToList()
+    {
+        Navigation.NavigateTo("/movies");
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_currentPage > 1)
+        {
+            _currentPage--;
+            await LoadData();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (_hasMore)
+        {
+            _currentPage++;
+            await LoadData();
+        }
+    }
+
+    private static string GetScoreClass(decimal score)
+    {
+        return score switch
+        {
+            >= 80 => "score-high",
+            >= 50 => "score-medium",
+            _ => "score-low"
+        };
+    }
+}
