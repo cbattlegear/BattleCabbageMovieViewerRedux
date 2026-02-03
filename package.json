@@ -1,0 +1,9 @@
+{
+  "name": "battlecabbage-movie-viewer",
+  "version": "1.0.0",
+  "description": "Battle Cabbage Movie Viewer - Blazor UI with Tailwind CSS",
+  "scripts": {
+    "css:build": "npx @tailwindcss/cli@4 -i ./wwwroot/css/input.css -o ./wwwroot/css/tailwind.css --minify",
+    "css:watch": "npx @tailwindcss/cli@4 -i ./wwwroot/css/input.css -o ./wwwroot/css/tailwind.css --watch"
+  }
+}

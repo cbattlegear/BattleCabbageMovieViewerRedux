@@ -99,3 +99,8 @@ docker-compose.override.yml
 *.temp
 *.bak
 *.swp
+
+# Local tooling
+.claude/
+agent-os/
+.playwright-mcp/
