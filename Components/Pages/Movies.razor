@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject IMovieApiService MovieApi
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>@(_selectedMovie != null ? _selectedMovie.Title : "Movies") - Battle Cabbage</PageTitle>
@@ -12,200 +13,368 @@
 @if (_selectedMovie != null)
 {
     <!-- Movie Detail View -->
-    <div class="movie-detail">
-        <button class="btn btn-outline-secondary mb-4" @onclick="BackToList">
-            <span class="bi bi-arrow-left me-2"></span>Back to Movies
-        </button>
-
-        <div class="row">
-            <div class="col-md-4">
-                <div class="poster-large">
-                    @if (!string.IsNullOrEmpty(_selectedMovie.FullPosterUrl))
-                    {
-                        <img src="@_selectedMovie.FullPosterUrl" alt="@_selectedMovie.Title" />
-                    }
-                    else
-                    {
-                        <div class="no-poster-large">
-                            <span class="bi bi-film"></span>
-                        </div>
-                    }
-                </div>
+    <div class="min-h-screen">
+        <!-- Hero Section with Clean Gradient Background -->
+        <section class="relative min-h-[480px] md:min-h-[520px] lg:min-h-[560px] w-full overflow-hidden hero-section">
+            <!-- Subtle gradient background -->
+            <div class="absolute inset-0">
+                <div class="absolute inset-0 hero-gradient"></div>
+                <!-- Decorative gradient orbs -->
+                <div class="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full hero-orb blur-3xl"></div>
+                <div class="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full hero-orb-secondary blur-3xl"></div>
             </div>
-            <div class="col-md-8">
-                <h1 class="movie-detail-title">@_selectedMovie.Title</h1>
-                
-                @if (!string.IsNullOrEmpty(_selectedMovie.Tagline))
-                {
-                    <p class="movie-tagline">@_selectedMovie.Tagline</p>
-                }
 
-                <div class="movie-meta">
-                    @if (!string.IsNullOrEmpty(_selectedMovie.MpaaRating))
-                    {
-                        <span class="meta-badge rating">@_selectedMovie.MpaaRating</span>
-                    }
-                    @if (!string.IsNullOrEmpty(_selectedMovie.Genre))
-                    {
-                        <span class="meta-badge genre">@_selectedMovie.Genre</span>
-                    }
-                    @if (_selectedMovie.ReleaseDate.HasValue)
-                    {
-                        <span class="meta-badge date">
-                            <span class="bi bi-calendar me-1"></span>
-                            @_selectedMovie.ReleaseDate.Value.ToString("MMMM d, yyyy")
-                        </span>
-                    }
-                    @if (_selectedMovie.AverageScore.HasValue)
-                    {
-                        <span class="meta-badge score">
-                            <span class="bi bi-star-fill text-warning me-1"></span>
-                            @_selectedMovie.AverageScore.Value.ToString("F1")
-                        </span>
-                    }
-                </div>
-
-                @if (!string.IsNullOrEmpty(_selectedMovie.Description))
-                {
-                    <div class="movie-description">
-                        <h4>Description</h4>
-                        <p>@_selectedMovie.Description</p>
-                    </div>
-                }
-
-                @if (_selectedMovie.Directors.Count > 0)
-                {
-                    <div class="movie-credits">
-                        <h4>Directors</h4>
-                        <div class="credits-list">
-                            @foreach (var director in _selectedMovie.Directors)
-                            {
-                                <span class="credit-item">@director.Director</span>
-                            }
-                        </div>
-                    </div>
-                }
-
-                @if (_selectedMovie.Actors.Count > 0)
-                {
-                    <div class="movie-credits">
-                        <h4>Cast</h4>
-                        <div class="credits-list">
-                            @foreach (var actor in _selectedMovie.Actors)
-                            {
-                                <span class="credit-item">@actor.Actor</span>
-                            }
-                        </div>
-                    </div>
-                }
+            <!-- Back Button -->
+            <div class="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-24">
+                <a href="/movies" class="btn-ghost inline-flex items-center">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+                    </svg>
+                    Back to Movies
+                </a>
             </div>
-        </div>
 
-        @if (_selectedMovie.Reviews.Count > 0)
-        {
-            <div class="reviews-section mt-5">
-                <h3>Critic Reviews</h3>
-                <div class="reviews-grid">
-                    @foreach (var review in _selectedMovie.Reviews)
-                    {
-                        <div class="review-card">
-                            @if (review.CriticScore.HasValue)
+            <!-- Content -->
+            <div class="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 pt-8 pb-12">
+
+                    <!-- Poster - The visual hero -->
+                    <div class="relative group shrink-0">
+                        <!-- Glow effect behind poster -->
+                        <div class="absolute -inset-4 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 poster-glow"></div>
+                        <div class="absolute -inset-2 rounded-2xl blur-xl poster-ambient"></div>
+
+                        <!-- Poster card -->
+                        <div class="relative w-52 sm:w-56 md:w-52 lg:w-64 xl:w-72 aspect-poster rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transform transition-transform duration-300 group-hover:scale-[1.02]">
+                            @if (!string.IsNullOrEmpty(_selectedMovie.FullPosterUrl))
                             {
-                                <div class="review-score @GetScoreClass(review.CriticScore.Value)">
-                                    @review.CriticScore.Value.ToString("F0")
+                                <img src="@_selectedMovie.FullPosterUrl" alt="@_selectedMovie.Title" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex flex-col items-center justify-center bg-theme-tertiary">
+                                    <svg class="w-20 h-20 text-theme-tertiary mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>
+                                    </svg>
+                                    <span class="text-theme-tertiary text-sm">No Poster</span>
                                 </div>
                             }
-                            <p class="review-text">@review.CriticReview</p>
+                        </div>
+                    </div>
+
+                    <!-- Movie Info -->
+                    <div class="flex-1 text-center md:text-left pt-2">
+                        <!-- Title -->
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-theme-primary tracking-tight mb-3 leading-tight">
+                            @_selectedMovie.Title
+                        </h1>
+
+                        <!-- Tagline -->
+                        @if (!string.IsNullOrEmpty(_selectedMovie.Tagline))
+                        {
+                            <p class="text-lg lg:text-xl text-theme-secondary italic mb-5">
+                                "@_selectedMovie.Tagline"
+                            </p>
+                        }
+
+                        <!-- Metadata row -->
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6">
+                            @if (_selectedMovie.AverageScore.HasValue)
+                            {
+                                <div class="flex items-center gap-1.5 text-accent font-semibold text-lg">
+                                    <svg class="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                    @_selectedMovie.AverageScore.Value.ToString("F1")
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(_selectedMovie.MpaaRating))
+                            {
+                                <span class="px-2.5 py-1 bg-theme-tertiary/50 rounded-md text-sm font-semibold text-theme-primary border border-theme-primary/20">
+                                    @_selectedMovie.MpaaRating
+                                </span>
+                            }
+                            @if (_selectedMovie.ReleaseDate.HasValue)
+                            {
+                                <span class="flex items-center gap-1.5 text-theme-secondary">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+                                    </svg>
+                                    @_selectedMovie.ReleaseDate.Value.ToString("MMMM d, yyyy")
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(_selectedMovie.Genre))
+                            {
+                                <span class="text-theme-tertiary hidden md:inline">•</span>
+                                <span class="text-theme-secondary">@_selectedMovie.Genre</span>
+                            }
+                        </div>
+
+                        <!-- Quick actions for mobile -->
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                            <button class="btn-ghost px-4 py-2.5" title="Add to watchlist">
+                                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                                    <line x1="12" x2="12" y1="7" y2="13"/>
+                                    <line x1="15" x2="9" y1="10" y2="10"/>
+                                </svg>
+                                Add to Watchlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Section -->
+        <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Main Content -->
+                <div class="lg:col-span-2 space-y-8">
+                    @if (!string.IsNullOrEmpty(_selectedMovie.Description))
+                    {
+                        <div class="card p-6">
+                            <h2 class="section-title mb-4">
+                                <i data-lucide="file-text" class="w-5 h-5 text-gold"></i>
+                                Overview
+                            </h2>
+                            <p class="text-theme-secondary leading-relaxed">@_selectedMovie.Description</p>
+                        </div>
+                    }
+
+                    @if (_selectedMovie.Reviews.Count > 0)
+                    {
+                        <div class="card p-6">
+                            <h2 class="section-title mb-4">
+                                <i data-lucide="message-square" class="w-5 h-5 text-gold"></i>
+                                Critic Reviews
+                            </h2>
+                            <div class="space-y-4">
+                                @foreach (var review in _selectedMovie.Reviews)
+                                {
+                                    <div class="p-4 rounded-lg bg-theme-tertiary/50">
+                                        <div class="flex items-start gap-4">
+                                            @if (review.CriticScore.HasValue)
+                                            {
+                                                <div class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg shrink-0 @GetScoreClass(review.CriticScore.Value)">
+                                                    @review.CriticScore.Value.ToString("F0")
+                                                </div>
+                                            }
+                                            <p class="text-theme-secondary text-sm leading-relaxed">@review.CriticReview</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    @if (_selectedMovie.Directors.Count > 0)
+                    {
+                        <div class="card p-6">
+                            <h3 class="section-title text-base mb-4">
+                                <i data-lucide="video" class="w-4 h-4 text-gold"></i>
+                                Directors
+                            </h3>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (var director in _selectedMovie.Directors)
+                                {
+                                    <span class="px-3 py-1.5 bg-theme-tertiary rounded-full text-sm text-theme-primary">
+                                        @director.Director
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (_selectedMovie.Actors.Count > 0)
+                    {
+                        <div class="card p-6">
+                            <h3 class="section-title text-base mb-4">
+                                <i data-lucide="users" class="w-4 h-4 text-gold"></i>
+                                Cast
+                            </h3>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (var actor in _selectedMovie.Actors)
+                                {
+                                    <span class="px-3 py-1.5 bg-theme-tertiary rounded-full text-sm text-theme-primary">
+                                        @actor.Actor
+                                    </span>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
             </div>
-        }
+        </div>
     </div>
 }
 else
 {
     <!-- Movies List View -->
-    <div class="movies-list-page">
-        <div class="page-header">
-            <h1>
-                <span class="bi bi-film me-2"></span>Movies
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-theme-primary flex items-center gap-3">
+                <i data-lucide="film" class="w-8 h-8 text-gold"></i>
+                Movies
                 @if (!string.IsNullOrEmpty(_genreFilter))
                 {
-                    <small class="text-muted">in @_genreFilter</small>
+                    <span class="text-theme-tertiary font-normal text-2xl">in @_genreFilter</span>
                 }
             </h1>
+
+            <!-- View Toggle -->
+            <div class="flex items-center gap-2">
+                <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Grid ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                        @onclick="() => _viewMode = ViewMode.Grid"
+                        title="Grid view">
+                    <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                </button>
+                <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Table ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                        @onclick="() => _viewMode = ViewMode.Table"
+                        title="Table view">
+                    <i data-lucide="table" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Filter -->
+        <div class="mb-6">
+            <div class="grid-search-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="text"
+                       class="grid-filter-input"
+                       placeholder="Search movies by title..."
+                       value="@_searchFilter"
+                       @oninput="OnSearchInput" />
+            </div>
         </div>
 
         @if (_isLoading)
         {
-            <div class="loading-container">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+            <div class="flex items-center justify-center py-20">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="spinner"></div>
+                    <p class="text-theme-secondary">Loading movies...</p>
                 </div>
+            </div>
+        }
+        else if (_viewMode == ViewMode.Grid)
+        {
+            <!-- Movies Grid View -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                @foreach (var movie in FilteredMovies)
+                {
+                    <MoviePosterCard Movie="movie" />
+                }
+            </div>
+
+            @if (!FilteredMovies.Any())
+            {
+                <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                    <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                    <p>No movies found matching your search.</p>
+                </div>
+            }
+
+            <!-- Pagination -->
+            <div class="flex justify-center items-center gap-3 mt-10">
+                <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
+                        @onclick="@(async () => await PreviousPage())"
+                        disabled="@(_currentPage == 1)">
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                    Previous
+                </button>
+                <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
+                    Page @_currentPage
+                </span>
+                <button type="button" class="btn-ghost @(!_hasMore ? "opacity-50 cursor-not-allowed" : "")"
+                        @onclick="@(async () => await NextPage())"
+                        disabled="@(!_hasMore)">
+                    Next
+                    <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                </button>
             </div>
         }
         else
         {
-            <div class="movies-grid">
-                @foreach (var movie in _movies)
-                {
-                    <div class="movie-card" @onclick="() => ViewMovie(movie.MovieId)">
-                        <div class="movie-poster">
-                            @if (!string.IsNullOrEmpty(movie.FullPosterUrl))
-                            {
-                                <img src="@movie.FullPosterUrl" alt="@movie.Title" />
-                            }
-                            else
-                            {
-                                <div class="no-poster">
-                                    <span class="bi bi-film"></span>
-                                </div>
-                            }
-                            @if (!string.IsNullOrEmpty(movie.MpaaRating))
-                            {
-                                <span class="rating-badge">@movie.MpaaRating</span>
-                            }
-                        </div>
-                        <div class="movie-card-content">
-                            <h5 class="movie-card-title">@movie.Title</h5>
-                            <div class="movie-card-meta">
-                                @if (!string.IsNullOrEmpty(movie.Genre))
-                                {
-                                    <span class="genre-tag">@movie.Genre</span>
-                                }
-                                @if (movie.AverageScore.HasValue)
-                                {
-                                    <span class="score-tag">
-                                        <span class="bi bi-star-fill"></span>
-                                        @movie.AverageScore.Value.ToString("F1")
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
+            <!-- Movies Table View with QuickGrid -->
+            <div class="quickgrid-wrapper">
+                <QuickGrid Items="@FilteredMovies.AsQueryable()" Class="quickgrid">
+                    <TemplateColumn Title="Poster" Class="w-16">
+                        <img src="@(context.FullPosterUrl ?? "https://placehold.co/48x72/374151/9ca3af?text=N/A")"
+                             alt="@context.Title"
+                             class="poster-thumbnail" />
+                    </TemplateColumn>
+                    <TemplateColumn Title="Title" Sortable="true" SortBy="@(GridSort<MovieResponse>.ByAscending(m => m.Title))">
+                        <a href="/movies/@context.MovieId" class="row-link">@context.Title</a>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(m => m.Genre)" Title="Genre" Sortable="true" />
+                    <TemplateColumn Title="Rating" Sortable="true" SortBy="@(GridSort<MovieResponse>.ByDescending(m => m.AverageScore ?? 0))">
+                        @if (context.AverageScore.HasValue)
+                        {
+                            <span class="rating-badge @GetRatingBadgeClass(context.AverageScore.Value)">
+                                @context.AverageScore.Value.ToString("F1")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-theme-tertiary">—</span>
+                        }
+                    </TemplateColumn>
+                    <TemplateColumn Title="MPAA">
+                        @if (!string.IsNullOrEmpty(context.MpaaRating))
+                        {
+                            <span class="mpaa-badge">@context.MpaaRating</span>
+                        }
+                        else
+                        {
+                            <span class="text-theme-tertiary">—</span>
+                        }
+                    </TemplateColumn>
+                    <TemplateColumn Title="Release Date" Sortable="true" SortBy="@(GridSort<MovieResponse>.ByDescending(m => m.ReleaseDate ?? DateTime.MinValue))">
+                        @if (context.ReleaseDate.HasValue)
+                        {
+                            @context.ReleaseDate.Value.ToString("MMM d, yyyy")
+                        }
+                        else
+                        {
+                            <span class="text-theme-tertiary">—</span>
+                        }
+                    </TemplateColumn>
+                </QuickGrid>
             </div>
 
+            @if (!FilteredMovies.Any())
+            {
+                <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                    <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                    <p>No movies found matching your search.</p>
+                </div>
+            }
+
             <!-- Pagination -->
-            <div class="pagination-container">
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
-                            <button class="page-link" @onclick="PreviousPage" disabled="@(_currentPage == 1)">
-                                <span class="bi bi-chevron-left"></span> Previous
-                            </button>
-                        </li>
-                        <li class="page-item active">
-                            <span class="page-link">Page @_currentPage</span>
-                        </li>
-                        <li class="page-item @(!_hasMore ? "disabled" : "")">
-                            <button class="page-link" @onclick="NextPage" disabled="@(!_hasMore)">
-                                Next <span class="bi bi-chevron-right"></span>
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
+            <div class="flex justify-center items-center gap-3 mt-10">
+                <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
+                        @onclick="@(async () => await PreviousPage())"
+                        disabled="@(_currentPage == 1)">
+                    <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                    Previous
+                </button>
+                <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
+                    Page @_currentPage
+                </span>
+                <button type="button" class="btn-ghost @(!_hasMore ? "opacity-50 cursor-not-allowed" : "")"
+                        @onclick="@(async () => await NextPage())"
+                        disabled="@(!_hasMore)">
+                    Next
+                    <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                </button>
             </div>
         }
     </div>
@@ -219,9 +388,17 @@ else
     private MovieResponse? _selectedMovie;
     private bool _isLoading = true;
     private int _currentPage = 1;
-    private const int PageSize = 12;
+    private const int PageSize = 24;
     private bool _hasMore = true;
     private string? _genreFilter;
+    private string _searchFilter = "";
+    private ViewMode _viewMode = ViewMode.Grid;
+
+    private enum ViewMode { Grid, Table }
+
+    private IEnumerable<MovieResponse> FilteredMovies => string.IsNullOrWhiteSpace(_searchFilter)
+        ? _movies
+        : _movies.Where(m => m.Title.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
@@ -230,7 +407,7 @@ else
         {
             _genreFilter = genre.ToString();
         }
-        
+
         await LoadData();
     }
 
@@ -244,6 +421,11 @@ else
         {
             _selectedMovie = null;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
     }
 
     private async Task LoadData()
@@ -270,19 +452,6 @@ else
         _selectedMovie = await MovieApi.GetMovieAsync(movieId);
     }
 
-    private void ViewMovie(int? movieId)
-    {
-        if (movieId.HasValue)
-        {
-            Navigation.NavigateTo($"/movies/{movieId}");
-        }
-    }
-
-    private void BackToList()
-    {
-        Navigation.NavigateTo("/movies");
-    }
-
     private async Task PreviousPage()
     {
         if (_currentPage > 1)
@@ -301,13 +470,29 @@ else
         }
     }
 
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        _searchFilter = e.Value?.ToString() ?? "";
+        StateHasChanged();
+    }
+
     private static string GetScoreClass(decimal score)
     {
         return score switch
         {
-            >= 80 => "score-high",
-            >= 50 => "score-medium",
-            _ => "score-low"
+            >= 80 => "bg-green-600 text-white",
+            >= 50 => "bg-yellow-500 text-black",
+            _ => "bg-red-600 text-white"
+        };
+    }
+
+    private static string GetRatingBadgeClass(decimal score)
+    {
+        return score switch
+        {
+            >= 7.5m => "high",
+            >= 5.0m => "medium",
+            _ => "low"
         };
     }
 }

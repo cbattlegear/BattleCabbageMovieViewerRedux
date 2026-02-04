@@ -1,0 +1,67 @@
+@using BattleCabbageMovieViewer.Models
+
+<a href="/movies/@Movie.MovieId" class="poster-card group w-full max-w-[300px] block">
+    <div class="relative w-full aspect-2/3 rounded-lg overflow-hidden bg-theme-tertiary">
+        @if (!string.IsNullOrEmpty(Movie.FullPosterUrl))
+        {
+            <img src="@Movie.FullPosterUrl"
+                 alt="@Movie.Title poster"
+                 loading="lazy"
+                 class="w-full h-full object-cover" />
+        }
+        else
+        {
+            <div class="w-full h-full flex items-center justify-center">
+                <i data-lucide="film" class="w-12 h-12 text-theme-tertiary"></i>
+            </div>
+        }
+
+        <!-- Rating Badge -->
+        @if (Movie.AverageScore.HasValue)
+        {
+            <div class="rating-badge absolute top-2 right-2 text-white">
+                <i data-lucide="star" class="w-3.5 h-3.5 text-gold fill-current"></i>
+                <span>@Movie.AverageScore.Value.ToString("F1")</span>
+            </div>
+        }
+
+        <!-- MPAA Rating -->
+        @if (!string.IsNullOrEmpty(Movie.MpaaRating))
+        {
+            <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/75 rounded text-xs font-medium text-white" style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+                @Movie.MpaaRating
+            </div>
+        }
+
+        <!-- Hover Overlay -->
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+    </div>
+
+    <div class="mt-3">
+        <h3 class="text-base font-semibold text-theme-primary line-clamp-2 group-hover:text-gold transition-colors duration-200">
+            @Movie.Title
+        </h3>
+        <p class="mt-1 text-sm text-theme-tertiary">
+            @if (Movie.ReleaseDate.HasValue)
+            {
+                @Movie.ReleaseDate.Value.Year
+            }
+            @if (!string.IsNullOrEmpty(Movie.Genre))
+            {
+                <span> &bull; @GetFirstGenre(Movie.Genre)</span>
+            }
+        </p>
+    </div>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public MovieResponse Movie { get; set; } = null!;
+
+    private string GetFirstGenre(string genre)
+    {
+        if (string.IsNullOrEmpty(genre)) return "";
+        var firstGenre = genre.Split(',', StringSplitOptions.TrimEntries).FirstOrDefault();
+        return firstGenre ?? genre;
+    }
+}

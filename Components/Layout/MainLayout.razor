@@ -1,23 +1,48 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="min-h-screen bg-theme-primary flex flex-col">
+    <!-- Top Navigation Bar -->
+    <TopNavBar OnThemeChanged="HandleThemeChanged" @rendermode="InteractiveServer" />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://api.battlecabbage.com/docs" target="_blank">API Docs</a>
-        </div>
-
-        <article class="content px-4">
+    <!-- Main Content Area (with padding for fixed nav) -->
+    <main class="pt-nav flex-1">
+        <article class="animate-fade-in">
             @Body
         </article>
     </main>
+
+    <!-- Footer -->
+    <footer class="bg-theme-secondary border-t border-theme-primary py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2 text-theme-secondary">
+                    <i data-lucide="clapperboard" class="w-5 h-5 text-gold"></i>
+                    <span class="text-sm">Battle Cabbage Movies</span>
+                </div>
+                <div class="flex items-center gap-6 text-sm text-theme-tertiary">
+                    <a href="https://api.battlecabbage.com/docs" target="_blank"
+                       class="hover:text-gold transition-colors flex items-center gap-1">
+                        API Documentation
+                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 
+<!-- Blazor Error UI -->
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <span class="dismiss">X</span>
 </div>
+
+@inject IJSRuntime JSRuntime
+
+@code {
+    private void HandleThemeChanged(string newTheme)
+    {
+        StateHasChanged();
+    }
+}

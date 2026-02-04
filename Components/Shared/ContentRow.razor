@@ -1,0 +1,78 @@
+@inject IJSRuntime JSRuntime
+
+<section class="mb-8">
+    <!-- Section Header - aligned with max-w-7xl container -->
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div class="section-header">
+            <h2 class="section-title">
+                @if (!string.IsNullOrEmpty(Icon))
+                {
+                    <i data-lucide="@Icon" class="w-6 h-6 text-gold"></i>
+                }
+                @Title
+            </h2>
+            @if (!string.IsNullOrEmpty(ViewAllHref))
+            {
+                <a href="@ViewAllHref" class="text-sm text-theme-secondary hover:text-gold transition-colors flex items-center gap-1">
+                    View All
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Scroll Container - full width for Netflix-style scroll, but content starts at correct position -->
+    <div class="relative group">
+        <div @ref="_scrollContainer" class="content-row scrollbar-hide content-row-scroll">
+            @ChildContent
+        </div>
+
+        <!-- Navigation Arrows (desktop only) -->
+        <button class="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center bg-theme-secondary/90 hover:bg-theme-tertiary rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
+                @onclick="ScrollLeft"
+                aria-label="Scroll left">
+            <i data-lucide="chevron-left" class="w-5 h-5 text-theme-primary"></i>
+        </button>
+        <button class="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center bg-theme-secondary/90 hover:bg-theme-tertiary rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
+                @onclick="ScrollRight"
+                aria-label="Scroll right">
+            <i data-lucide="chevron-right" class="w-5 h-5 text-theme-primary"></i>
+        </button>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public string? ViewAllHref { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private ElementReference _scrollContainer;
+
+    private async Task ScrollLeft()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            (function(el) {
+                el.scrollBy({ left: -el.clientWidth * 0.8, behavior: 'smooth' });
+            })(arguments[0])
+        ", _scrollContainer);
+    }
+
+    private async Task ScrollRight()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            (function(el) {
+                el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' });
+            })(arguments[0])
+        ", _scrollContainer);
+    }
+}

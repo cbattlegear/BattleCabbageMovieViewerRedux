@@ -2,60 +2,141 @@
 @using BattleCabbageMovieViewer.Models
 @using BattleCabbageMovieViewer.Services
 @inject IMovieApiService MovieApi
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Directors - Battle Cabbage</PageTitle>
 
-<div class="list-page">
-    <div class="page-header">
-        <h1>
-            <span class="bi bi-camera-reels-fill me-2"></span>Directors
+<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-theme-primary flex items-center gap-3">
+            <i data-lucide="video" class="w-8 h-8 text-gold"></i>
+            Directors
         </h1>
+
+        <!-- View Toggle -->
+        <div class="flex items-center gap-2">
+            <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Grid ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                    @onclick="() => _viewMode = ViewMode.Grid"
+                    title="Grid view">
+                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+            </button>
+            <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Table ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                    @onclick="() => _viewMode = ViewMode.Table"
+                    title="Table view">
+                <i data-lucide="table" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Filter -->
+    <div class="mb-6">
+        <div class="grid-search-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text"
+                   class="grid-filter-input"
+                   placeholder="Search directors by name..."
+                   value="@_searchFilter"
+                   @oninput="OnSearchInput" />
+        </div>
     </div>
 
     @if (_isLoading)
     {
-        <div class="loading-container">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+        <div class="flex items-center justify-center py-20">
+            <div class="flex flex-col items-center gap-4">
+                <div class="spinner"></div>
+                <p class="text-theme-secondary">Loading directors...</p>
             </div>
         </div>
     }
-    else
+    else if (_viewMode == ViewMode.Grid)
     {
-        <div class="items-grid">
-            @foreach (var director in _directors)
+        <!-- Directors Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            @foreach (var director in FilteredDirectors)
             {
-                <div class="item-card">
-                    <div class="item-icon">
-                        <span class="bi bi-megaphone-fill"></span>
+                <div class="card p-4 flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
+                        <i data-lucide="clapperboard" class="w-8 h-8 text-theme-secondary"></i>
                     </div>
-                    <div class="item-content">
-                        <h5 class="item-name">@director.Director</h5>
-                    </div>
+                    <span class="text-theme-primary font-medium text-sm line-clamp-2">
+                        @director.Director
+                    </span>
                 </div>
             }
         </div>
 
+        @if (!FilteredDirectors.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <p>No directors found matching your search.</p>
+            </div>
+        }
+
         <!-- Pagination -->
-        <div class="pagination-container">
-            <nav>
-                <ul class="pagination">
-                    <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
-                        <button class="page-link" @onclick="PreviousPage" disabled="@(_currentPage == 1)">
-                            <span class="bi bi-chevron-left"></span> Previous
-                        </button>
-                    </li>
-                    <li class="page-item active">
-                        <span class="page-link">Page @_currentPage</span>
-                    </li>
-                    <li class="page-item @(!_hasMore ? "disabled" : "")">
-                        <button class="page-link" @onclick="NextPage" disabled="@(!_hasMore)">
-                            Next <span class="bi bi-chevron-right"></span>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
+        <div class="flex justify-center items-center gap-3 mt-10">
+            <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
+                    @onclick="@(async () => await PreviousPage())"
+                    disabled="@(_currentPage == 1)">
+                <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                Previous
+            </button>
+            <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
+                Page @_currentPage
+            </span>
+            <button type="button" class="btn-ghost @(!_hasMore ? "opacity-50 cursor-not-allowed" : "")"
+                    @onclick="@(async () => await NextPage())"
+                    disabled="@(!_hasMore)">
+                Next
+                <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+            </button>
+        </div>
+    }
+    else
+    {
+        <!-- Directors Table View with QuickGrid -->
+        <div class="quickgrid-wrapper">
+            <QuickGrid Items="@FilteredDirectors.AsQueryable()" Class="quickgrid">
+                <TemplateColumn Title="" Class="w-16">
+                    <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
+                        <i data-lucide="clapperboard" class="w-5 h-5 text-theme-secondary"></i>
+                    </div>
+                </TemplateColumn>
+                <PropertyColumn Property="@(d => d.Director)" Title="Name" Sortable="true" />
+                <PropertyColumn Property="@(d => d.DirectorId)" Title="ID" Sortable="true" />
+            </QuickGrid>
+        </div>
+
+        @if (!FilteredDirectors.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <p>No directors found matching your search.</p>
+            </div>
+        }
+
+        <!-- Pagination -->
+        <div class="flex justify-center items-center gap-3 mt-10">
+            <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
+                    @onclick="@(async () => await PreviousPage())"
+                    disabled="@(_currentPage == 1)">
+                <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                Previous
+            </button>
+            <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
+                Page @_currentPage
+            </span>
+            <button type="button" class="btn-ghost @(!_hasMore ? "opacity-50 cursor-not-allowed" : "")"
+                    @onclick="@(async () => await NextPage())"
+                    disabled="@(!_hasMore)">
+                Next
+                <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+            </button>
         </div>
     }
 </div>
@@ -66,10 +147,23 @@
     private int _currentPage = 1;
     private const int PageSize = 50;
     private bool _hasMore = true;
+    private string _searchFilter = "";
+    private ViewMode _viewMode = ViewMode.Grid;
+
+    private enum ViewMode { Grid, Table }
+
+    private IEnumerable<DirectorResponse> FilteredDirectors => string.IsNullOrWhiteSpace(_searchFilter)
+        ? _directors
+        : _directors.Where(d => d.Director.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
     }
 
     private async Task LoadData()
@@ -107,5 +201,11 @@
             _currentPage++;
             await LoadData();
         }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        _searchFilter = e.Value?.ToString() ?? "";
+        StateHasChanged();
     }
 }

@@ -2,49 +2,150 @@
 @using BattleCabbageMovieViewer.Models
 @using BattleCabbageMovieViewer.Services
 @inject IMovieApiService MovieApi
-@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Genres - Battle Cabbage</PageTitle>
 
-<div class="list-page">
-    <div class="page-header">
-        <h1>
-            <span class="bi bi-collection-fill me-2"></span>Genres
+<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-theme-primary flex items-center gap-3">
+            <i data-lucide="layers" class="w-8 h-8 text-gold"></i>
+            Genres
         </h1>
+
+        <!-- View Toggle -->
+        <div class="flex items-center gap-2">
+            <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Grid ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                    @onclick="() => _viewMode = ViewMode.Grid"
+                    title="Grid view">
+                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+            </button>
+            <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Table ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
+                    @onclick="() => _viewMode = ViewMode.Table"
+                    title="Table view">
+                <i data-lucide="table" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Filter -->
+    <div class="mb-6">
+        <div class="grid-search-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text"
+                   class="grid-filter-input"
+                   placeholder="Search genres..."
+                   value="@_searchFilter"
+                   @oninput="OnSearchInput" />
+        </div>
     </div>
 
     @if (_isLoading)
     {
-        <div class="loading-container">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+        <div class="flex items-center justify-center py-20">
+            <div class="flex flex-col items-center gap-4">
+                <div class="spinner"></div>
+                <p class="text-theme-secondary">Loading genres...</p>
             </div>
         </div>
     }
-    else
+    else if (_viewMode == ViewMode.Grid)
     {
-        <div class="genres-grid">
-            @foreach (var genre in _genres)
+        <!-- Genres Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var genre in FilteredGenres)
             {
-                <div class="genre-card" @onclick="() => BrowseGenre(genre.Genre)">
-                    <div class="genre-icon">
-                        <span class="bi @GetGenreIcon(genre.Genre)"></span>
+                <a href="/movies?genre=@Uri.EscapeDataString(genre.Genre)"
+                   class="card card-hover p-6 flex items-center gap-4 text-left group">
+                    <div class="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0 group-hover:bg-gold/20 transition-colors">
+                        <i data-lucide="@GetGenreIcon(genre.Genre)" class="w-7 h-7 text-gold"></i>
                     </div>
-                    <div class="genre-content">
-                        <h4 class="genre-name">@genre.Genre</h4>
-                        <p class="genre-description">Browse movies in this genre</p>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-theme-primary group-hover:text-gold transition-colors">
+                            @genre.Genre
+                        </h3>
+                        <p class="text-sm text-theme-tertiary">
+                            @if (genre.MovieCount.HasValue)
+                            {
+                                @($"{genre.MovieCount} movies")
+                            }
+                            else
+                            {
+                                @("Browse movies")
+                            }
+                        </p>
                     </div>
-                    <span class="bi bi-chevron-right genre-arrow"></span>
-                </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-theme-tertiary group-hover:text-gold group-hover:translate-x-1 transition-all flex-shrink-0"></i>
+                </a>
             }
         </div>
+
+        @if (!FilteredGenres.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <p>No genres found matching your search.</p>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Genres Table View with QuickGrid -->
+        <div class="quickgrid-wrapper">
+            <QuickGrid Items="@FilteredGenres.AsQueryable()" Class="quickgrid">
+                <TemplateColumn Title="" Class="w-16">
+                    <div class="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+                        <i data-lucide="@GetGenreIcon(context.Genre)" class="w-5 h-5 text-gold"></i>
+                    </div>
+                </TemplateColumn>
+                <TemplateColumn Title="Genre" Sortable="true" SortBy="@(GridSort<GenreResponse>.ByAscending(g => g.Genre))">
+                    <a href="/movies?genre=@Uri.EscapeDataString(context.Genre)" class="row-link">@context.Genre</a>
+                </TemplateColumn>
+                <TemplateColumn Title="Movies" Sortable="true" SortBy="@(GridSort<GenreResponse>.ByDescending(g => g.MovieCount ?? 0))">
+                    @if (context.MovieCount.HasValue)
+                    {
+                        <span class="text-theme-secondary">@context.MovieCount</span>
+                    }
+                    else
+                    {
+                        <span class="text-theme-tertiary">—</span>
+                    }
+                </TemplateColumn>
+                <TemplateColumn Title="">
+                    <a href="/movies?genre=@Uri.EscapeDataString(context.Genre)"
+                       class="btn-ghost px-3 py-1.5 text-sm inline-flex items-center">
+                        Browse
+                        <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                    </a>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
+
+        @if (!FilteredGenres.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
+                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <p>No genres found matching your search.</p>
+            </div>
+        }
     }
 </div>
 
 @code {
     private List<GenreResponse> _genres = [];
     private bool _isLoading = true;
+    private string _searchFilter = "";
+    private ViewMode _viewMode = ViewMode.Grid;
+
+    private enum ViewMode { Grid, Table }
+
+    private IEnumerable<GenreResponse> FilteredGenres => string.IsNullOrWhiteSpace(_searchFilter)
+        ? _genres
+        : _genres.Where(g => g.Genre.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,33 +159,39 @@
         }
     }
 
-    private void BrowseGenre(string genre)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Navigation.NavigateTo($"/movies?genre={Uri.EscapeDataString(genre)}");
+        await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        _searchFilter = e.Value?.ToString() ?? "";
+        StateHasChanged();
     }
 
     private static string GetGenreIcon(string genre)
     {
         return genre.ToLower() switch
         {
-            "action" => "bi-lightning-fill",
-            "adventure" => "bi-compass-fill",
-            "comedy" => "bi-emoji-laughing-fill",
-            "drama" => "bi-mask",
-            "horror" => "bi-bug-fill",
-            "sci-fi" or "science fiction" => "bi-rocket-takeoff-fill",
-            "romance" => "bi-heart-fill",
-            "thriller" => "bi-exclamation-triangle-fill",
-            "animation" => "bi-brush-fill",
-            "documentary" => "bi-camera-video-fill",
-            "fantasy" => "bi-magic",
-            "mystery" => "bi-search",
-            "crime" => "bi-shield-exclamation",
-            "western" => "bi-sunrise-fill",
-            "musical" => "bi-music-note-beamed",
-            "war" => "bi-shield-fill",
-            "family" => "bi-house-heart-fill",
-            _ => "bi-film"
+            "action" => "zap",
+            "adventure" => "compass",
+            "comedy" => "smile",
+            "drama" => "theater",
+            "horror" => "skull",
+            "sci-fi" or "science fiction" => "rocket",
+            "romance" => "heart",
+            "thriller" => "alert-triangle",
+            "animation" => "palette",
+            "documentary" => "camera",
+            "fantasy" => "sparkles",
+            "mystery" => "search",
+            "crime" => "shield-alert",
+            "western" => "sunrise",
+            "musical" => "music",
+            "war" => "shield",
+            "family" => "home",
+            _ => "film"
         };
     }
 }
