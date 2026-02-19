@@ -42,7 +42,7 @@
   --animate-shimmer: shimmer 1.5s infinite;
 
   /* Aspect Ratios */
-  --aspect-ratio-poster: 2 / 3;
+  --aspect-ratio-poster: 4 / 7;
   --aspect-ratio-backdrop: 16 / 9;
 }
 
@@ -217,7 +217,7 @@ body {
 
 /* Aspect Ratios */
 .aspect-poster {
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 4 / 7;
 }
 
 .aspect-backdrop {

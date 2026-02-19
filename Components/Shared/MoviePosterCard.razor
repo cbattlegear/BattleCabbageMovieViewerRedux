@@ -1,7 +1,7 @@
 @using BattleCabbageMovieViewer.Models
 
 <a href="/movies/@Movie.MovieId" class="poster-card group w-full max-w-[300px] block">
-    <div class="relative w-full aspect-2/3 rounded-lg overflow-hidden bg-theme-tertiary">
+    <div class="relative w-full aspect-poster rounded-lg overflow-hidden bg-theme-tertiary">
         @if (!string.IsNullOrEmpty(Movie.FullPosterUrl))
         {
             <img src="@Movie.FullPosterUrl"
