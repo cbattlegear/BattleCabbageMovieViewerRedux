@@ -11,7 +11,7 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <h1 class="text-3xl md:text-4xl font-bold text-theme-primary flex items-center gap-3">
-            <i data-lucide="video" class="w-8 h-8 text-gold"></i>
+            <LucideIcon Name="video" Class="w-8 h-8 text-gold" />
             Directors
         </h1>
 
@@ -20,12 +20,12 @@
             <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Grid ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
                     @onclick="() => _viewMode = ViewMode.Grid"
                     title="Grid view">
-                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                <LucideIcon Name="grid-3x3" Class="w-5 h-5" />
             </button>
             <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Table ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
                     @onclick="() => _viewMode = ViewMode.Table"
                     title="Table view">
-                <i data-lucide="table" class="w-5 h-5"></i>
+                <LucideIcon Name="table" Class="w-5 h-5" />
             </button>
         </div>
     </div>
@@ -61,7 +61,7 @@
             {
                 <div class="card p-4 flex flex-col items-center text-center">
                     <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
-                        <i data-lucide="clapperboard" class="w-8 h-8 text-theme-secondary"></i>
+                        <LucideIcon Name="clapperboard" Class="w-8 h-8 text-theme-secondary" />
                     </div>
                     <span class="text-theme-primary font-medium text-sm line-clamp-2">
                         @director.Director
@@ -73,7 +73,7 @@
         @if (!FilteredDirectors.Any())
         {
             <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
-                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <LucideIcon Name="search-x" Class="w-12 h-12 mb-4" />
                 <p>No directors found matching your search.</p>
             </div>
         }
@@ -83,7 +83,7 @@
             <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
                     @onclick="@(async () => await PreviousPage())"
                     disabled="@(_currentPage == 1)">
-                <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                <LucideIcon Name="chevron-left" Class="w-5 h-5 mr-1" />
                 Previous
             </button>
             <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
@@ -93,7 +93,7 @@
                     @onclick="@(async () => await NextPage())"
                     disabled="@(!_hasMore)">
                 Next
-                <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                <LucideIcon Name="chevron-right" Class="w-5 h-5 ml-1" />
             </button>
         </div>
     }
@@ -104,7 +104,7 @@
             <QuickGrid Items="@FilteredDirectors.AsQueryable()" Class="quickgrid">
                 <TemplateColumn Title="" Class="w-16">
                     <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
-                        <i data-lucide="clapperboard" class="w-5 h-5 text-theme-secondary"></i>
+                        <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
                     </div>
                 </TemplateColumn>
                 <PropertyColumn Property="@(d => d.Director)" Title="Name" Sortable="true" />
@@ -115,7 +115,7 @@
         @if (!FilteredDirectors.Any())
         {
             <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
-                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <LucideIcon Name="search-x" Class="w-12 h-12 mb-4" />
                 <p>No directors found matching your search.</p>
             </div>
         }
@@ -125,7 +125,7 @@
             <button type="button" class="btn-ghost @(_currentPage == 1 ? "opacity-50 cursor-not-allowed" : "")"
                     @onclick="@(async () => await PreviousPage())"
                     disabled="@(_currentPage == 1)">
-                <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i>
+                <LucideIcon Name="chevron-left" Class="w-5 h-5 mr-1" />
                 Previous
             </button>
             <span class="px-5 py-2.5 bg-gold text-black rounded-lg font-semibold">
@@ -135,7 +135,7 @@
                     @onclick="@(async () => await NextPage())"
                     disabled="@(!_hasMore)">
                 Next
-                <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                <LucideIcon Name="chevron-right" Class="w-5 h-5 ml-1" />
             </button>
         </div>
     }
@@ -163,7 +163,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
     }
 
     private async Task LoadData()

@@ -12,7 +12,7 @@
         else
         {
             <div class="w-full h-full flex items-center justify-center">
-                <i data-lucide="film" class="w-12 h-12 text-theme-tertiary"></i>
+                <LucideIcon Name="film" Class="w-12 h-12 text-theme-tertiary" />
             </div>
         }
 
@@ -20,7 +20,7 @@
         @if (Movie.AverageScore.HasValue)
         {
             <div class="rating-badge absolute top-2 right-2 text-white">
-                <i data-lucide="star" class="w-3.5 h-3.5 text-gold fill-current"></i>
+                <LucideIcon Name="star" Class="w-3.5 h-3.5 text-gold" Fill="currentColor" />
                 <span>@Movie.AverageScore.Value.ToString("F1")</span>
             </div>
         }

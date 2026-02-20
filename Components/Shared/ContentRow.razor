@@ -7,7 +7,7 @@
             <h2 class="section-title">
                 @if (!string.IsNullOrEmpty(Icon))
                 {
-                    <i data-lucide="@Icon" class="w-6 h-6 text-gold"></i>
+                    <LucideIcon Name="@Icon" Class="w-6 h-6 text-gold" />
                 }
                 @Title
             </h2>
@@ -15,7 +15,7 @@
             {
                 <a href="@ViewAllHref" class="text-sm text-theme-secondary hover:text-gold transition-colors flex items-center gap-1">
                     View All
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    <LucideIcon Name="chevron-right" Class="w-4 h-4" />
                 </a>
             }
         </div>
@@ -32,13 +32,13 @@
                 style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
                 @onclick="ScrollLeft"
                 aria-label="Scroll left">
-            <i data-lucide="chevron-left" class="w-5 h-5 text-theme-primary"></i>
+            <LucideIcon Name="chevron-left" Class="w-5 h-5 text-theme-primary" />
         </button>
         <button class="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center bg-theme-secondary/90 hover:bg-theme-tertiary rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 style="box-shadow: 0 4px 12px rgba(0,0,0,0.3);"
                 @onclick="ScrollRight"
                 aria-label="Scroll right">
-            <i data-lucide="chevron-right" class="w-5 h-5 text-theme-primary"></i>
+            <LucideIcon Name="chevron-right" Class="w-5 h-5 text-theme-primary" />
         </button>
     </div>
 </section>

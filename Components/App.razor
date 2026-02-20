@@ -47,25 +47,6 @@
     </div>
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Expose for Blazor to call after dynamic content updates
-        window.initializeLucideIcons = function() {
-            lucide.createIcons();
-        };
-
-        // Re-initialize icons after Blazor enhanced navigation
-        if (typeof Blazor !== 'undefined') {
-            Blazor.addEventListener('enhancedload', function() {
-                lucide.createIcons();
-            });
-        }
-    </script>
 </body>
 
 </html>

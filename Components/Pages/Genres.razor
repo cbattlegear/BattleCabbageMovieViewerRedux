@@ -11,7 +11,7 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <h1 class="text-3xl md:text-4xl font-bold text-theme-primary flex items-center gap-3">
-            <i data-lucide="layers" class="w-8 h-8 text-gold"></i>
+            <LucideIcon Name="layers" Class="w-8 h-8 text-gold" />
             Genres
         </h1>
 
@@ -20,12 +20,12 @@
             <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Grid ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
                     @onclick="() => _viewMode = ViewMode.Grid"
                     title="Grid view">
-                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                <LucideIcon Name="grid-3x3" Class="w-5 h-5" />
             </button>
             <button class="p-2 rounded-lg transition-colors @(_viewMode == ViewMode.Table ? "bg-gold text-black" : "bg-theme-tertiary text-theme-secondary hover:text-theme-primary")"
                     @onclick="() => _viewMode = ViewMode.Table"
                     title="Table view">
-                <i data-lucide="table" class="w-5 h-5"></i>
+                <LucideIcon Name="table" Class="w-5 h-5" />
             </button>
         </div>
     </div>
@@ -62,7 +62,7 @@
                 <a href="/movies?genre=@Uri.EscapeDataString(genre.Genre)"
                    class="card card-hover p-6 flex items-center gap-4 text-left group">
                     <div class="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0 group-hover:bg-gold/20 transition-colors">
-                        <i data-lucide="@GetGenreIcon(genre.Genre)" class="w-7 h-7 text-gold"></i>
+                        <LucideIcon Name="@GetGenreIcon(genre.Genre)" Class="w-7 h-7 text-gold" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg font-semibold text-theme-primary group-hover:text-gold transition-colors">
@@ -79,7 +79,7 @@
                             }
                         </p>
                     </div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-theme-tertiary group-hover:text-gold group-hover:translate-x-1 transition-all flex-shrink-0"></i>
+                    <LucideIcon Name="chevron-right" Class="w-5 h-5 text-theme-tertiary group-hover:text-gold group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </a>
             }
         </div>
@@ -87,7 +87,7 @@
         @if (!FilteredGenres.Any())
         {
             <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
-                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <LucideIcon Name="search-x" Class="w-12 h-12 mb-4" />
                 <p>No genres found matching your search.</p>
             </div>
         }
@@ -99,7 +99,7 @@
             <QuickGrid Items="@FilteredGenres.AsQueryable()" Class="quickgrid">
                 <TemplateColumn Title="" Class="w-16">
                     <div class="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
-                        <i data-lucide="@GetGenreIcon(context.Genre)" class="w-5 h-5 text-gold"></i>
+                        <LucideIcon Name="@GetGenreIcon(context.Genre)" Class="w-5 h-5 text-gold" />
                     </div>
                 </TemplateColumn>
                 <TemplateColumn Title="Genre" Sortable="true" SortBy="@(GridSort<GenreResponse>.ByAscending(g => g.Genre))">
@@ -119,7 +119,7 @@
                     <a href="/movies?genre=@Uri.EscapeDataString(context.Genre)"
                        class="btn-ghost px-3 py-1.5 text-sm inline-flex items-center">
                         Browse
-                        <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                        <LucideIcon Name="chevron-right" Class="w-4 h-4 ml-1" />
                     </a>
                 </TemplateColumn>
             </QuickGrid>
@@ -128,7 +128,7 @@
         @if (!FilteredGenres.Any())
         {
             <div class="flex flex-col items-center justify-center py-20 text-theme-tertiary">
-                <i data-lucide="search-x" class="w-12 h-12 mb-4"></i>
+                <LucideIcon Name="search-x" Class="w-12 h-12 mb-4" />
                 <p>No genres found matching your search.</p>
             </div>
         }
@@ -161,7 +161,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
     }
 
     private void OnSearchInput(ChangeEventArgs e)

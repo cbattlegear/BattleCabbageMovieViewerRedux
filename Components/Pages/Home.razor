@@ -71,7 +71,7 @@ else
         {
             <section class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
                 <h2 class="section-title mb-6">
-                    <i data-lucide="layers" class="w-6 h-6 text-gold"></i>
+                    <LucideIcon Name="layers" Class="w-6 h-6 text-gold" />
                     Browse by Genre
                 </h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
@@ -108,7 +108,7 @@ else
                 {
                     <div class="card p-6">
                         <h3 class="section-title mb-4">
-                            <i data-lucide="users" class="w-5 h-5 text-gold"></i>
+                            <LucideIcon Name="users" Class="w-5 h-5 text-gold" />
                             Top Actors
                         </h3>
                         <div class="space-y-3">
@@ -116,7 +116,7 @@ else
                             {
                                 <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors">
                                     <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="user" class="w-5 h-5 text-theme-secondary"></i>
+                                        <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <span class="text-theme-primary font-medium block truncate">@actor.Actor</span>
@@ -133,7 +133,7 @@ else
                 {
                     <div class="card p-6">
                         <h3 class="section-title mb-4">
-                            <i data-lucide="video" class="w-5 h-5 text-gold"></i>
+                            <LucideIcon Name="video" Class="w-5 h-5 text-gold" />
                             Top Directors
                         </h3>
                         <div class="space-y-3">
@@ -141,7 +141,7 @@ else
                             {
                                 <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors">
                                     <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="clapperboard" class="w-5 h-5 text-theme-secondary"></i>
+                                        <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <span class="text-theme-primary font-medium block truncate">@director.Director</span>
@@ -203,11 +203,6 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-        {
-            // Re-initialize Lucide icons after content updates
-            await JSRuntime.InvokeVoidAsync("initializeLucideIcons");
-        }
     }
 
 }
