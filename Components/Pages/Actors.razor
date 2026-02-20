@@ -59,16 +59,72 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             @foreach (var actor in FilteredActors)
             {
-                <div class="card p-4 flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
-                        <LucideIcon Name="user" Class="w-8 h-8 text-theme-secondary" />
-                    </div>
+                <div class="card p-4 flex flex-col items-center text-center cursor-pointer hover:ring-2 hover:ring-gold transition-all @(_selectedActorId == actor.ActorId ? "ring-2 ring-gold" : "")"
+                     @onclick="() => ToggleActorMovies(actor)">
+                    @if (!string.IsNullOrEmpty(actor.ImageUrl))
+                    {
+                        <img src="@actor.ImageUrl" alt="@actor.Actor" class="w-16 h-16 rounded-full object-cover mb-3" />
+                    }
+                    else
+                    {
+                        <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
+                            <LucideIcon Name="user" Class="w-8 h-8 text-theme-secondary" />
+                        </div>
+                    }
                     <span class="text-theme-primary font-medium text-sm line-clamp-2">
                         @actor.Actor
                     </span>
                 </div>
             }
         </div>
+
+        <!-- Selected Actor Movies -->
+        @if (_selectedActorId.HasValue)
+        {
+            <div class="mt-6 card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-theme-primary flex items-center gap-2">
+                        <LucideIcon Name="film" Class="w-5 h-5 text-gold" />
+                        Movies featuring @_selectedActorName
+                    </h2>
+                    <button class="p-1 rounded hover:bg-theme-tertiary text-theme-secondary" @onclick="CloseActorMovies">
+                        <LucideIcon Name="x" Class="w-5 h-5" />
+                    </button>
+                </div>
+                @if (_isLoadingMovies)
+                {
+                    <div class="flex items-center gap-3 py-4">
+                        <div class="spinner"></div>
+                        <span class="text-theme-secondary">Loading movies...</span>
+                    </div>
+                }
+                else if (_actorMovies.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        @foreach (var movie in _actorMovies)
+                        {
+                            <div class="card p-3 flex gap-3">
+                                @if (movie.FullPosterUrl != null)
+                                {
+                                    <img src="@movie.FullPosterUrl" alt="@movie.Title" class="w-12 h-[4.5rem] rounded object-cover flex-shrink-0" />
+                                }
+                                <div class="min-w-0">
+                                    <p class="text-theme-primary font-medium text-sm line-clamp-2">@movie.Title</p>
+                                    @if (movie.ReleaseDate.HasValue)
+                                    {
+                                        <p class="text-theme-secondary text-xs mt-1">@movie.ReleaseDate.Value.Year</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-theme-secondary py-4">No movies found for this actor.</p>
+                }
+            </div>
+        }
 
         @if (!FilteredActors.Any())
         {
@@ -103,11 +159,22 @@
         <div class="quickgrid-wrapper">
             <QuickGrid Items="@FilteredActors.AsQueryable()" Class="quickgrid">
                 <TemplateColumn Title="" Class="w-16">
-                    <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
-                        <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
-                    </div>
+                    @if (!string.IsNullOrEmpty(context.ImageUrl))
+                    {
+                        <img src="@context.ImageUrl" alt="@context.Actor" class="w-10 h-10 rounded-full object-cover" />
+                    }
+                    else
+                    {
+                        <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
+                            <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
+                        </div>
+                    }
                 </TemplateColumn>
-                <PropertyColumn Property="@(a => a.Actor)" Title="Name" Sortable="true" />
+                <TemplateColumn Title="Name" Sortable="true" SortBy="@(GridSort<ActorResponse>.ByAscending(a => a.Actor))">
+                    <button class="text-left hover:text-gold transition-colors" @onclick="() => ToggleActorMovies(context)">
+                        @context.Actor
+                    </button>
+                </TemplateColumn>
                 <PropertyColumn Property="@(a => a.ActorId)" Title="ID" Sortable="true" />
             </QuickGrid>
         </div>
@@ -149,6 +216,10 @@
     private bool _hasMore = true;
     private string _searchFilter = "";
     private ViewMode _viewMode = ViewMode.Grid;
+    private int? _selectedActorId;
+    private string? _selectedActorName;
+    private List<MovieResponse> _actorMovies = [];
+    private bool _isLoadingMovies;
 
     private enum ViewMode { Grid, Table }
 
@@ -206,5 +277,30 @@
     {
         _searchFilter = e.Value?.ToString() ?? "";
         StateHasChanged();
+    }
+
+    private async Task ToggleActorMovies(ActorResponse actor)
+    {
+        if (_selectedActorId == actor.ActorId)
+        {
+            CloseActorMovies();
+            return;
+        }
+
+        _selectedActorId = actor.ActorId;
+        _selectedActorName = actor.Actor;
+        _isLoadingMovies = true;
+        _actorMovies = [];
+        StateHasChanged();
+
+        _actorMovies = await MovieApi.GetActorMoviesAsync(actor.ActorId);
+        _isLoadingMovies = false;
+    }
+
+    private void CloseActorMovies()
+    {
+        _selectedActorId = null;
+        _selectedActorName = null;
+        _actorMovies = [];
     }
 }

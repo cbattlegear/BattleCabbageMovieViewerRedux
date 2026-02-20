@@ -4,4 +4,5 @@ public class ActorResponse
 {
     public int ActorId { get; set; }
     public string Actor { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
 }
