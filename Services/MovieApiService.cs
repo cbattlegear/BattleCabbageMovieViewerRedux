@@ -21,7 +21,9 @@ public interface IMovieApiService
 
     // Directors
     Task<List<DirectorResponse>> GetDirectorsAsync(int skip = 0, int limit = 50);
+    Task<DirectorResponse?> GetDirectorAsync(int directorId);
     Task<List<TopDirectorResponse>> GetTopDirectorsAsync();
+    Task<List<MovieResponse>> GetDirectorMoviesAsync(int directorId);
 
     // Genres
     Task<List<GenreResponse>> GetGenresAsync();
@@ -109,9 +111,19 @@ public class MovieApiService : IMovieApiService
         return await GetAsync<List<DirectorResponse>>($"directors?skip={skip}&limit={limit}") ?? [];
     }
 
+    public async Task<DirectorResponse?> GetDirectorAsync(int directorId)
+    {
+        return await GetAsync<DirectorResponse>($"directors/{directorId}");
+    }
+
     public async Task<List<TopDirectorResponse>> GetTopDirectorsAsync()
     {
         return await GetAsync<List<TopDirectorResponse>>("directors/top") ?? [];
+    }
+
+    public async Task<List<MovieResponse>> GetDirectorMoviesAsync(int directorId)
+    {
+        return await GetAsync<List<MovieResponse>>($"directors/{directorId}/movies") ?? [];
     }
 
     // Genres

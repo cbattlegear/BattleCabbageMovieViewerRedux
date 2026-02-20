@@ -2,7 +2,6 @@
 @using BattleCabbageMovieViewer.Models
 @using BattleCabbageMovieViewer.Services
 @inject IMovieApiService MovieApi
-@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Directors - Battle Cabbage</PageTitle>
@@ -59,14 +58,24 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             @foreach (var director in FilteredDirectors)
             {
-                <div class="card p-4 flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
-                        <LucideIcon Name="clapperboard" Class="w-8 h-8 text-theme-secondary" />
-                    </div>
+                <a href="/directors/@director.DirectorId" class="card p-4 flex flex-col items-center text-center cursor-pointer hover:ring-2 hover:ring-gold transition-all no-underline">
+                    @if (!string.IsNullOrEmpty(director.FullImageUrl))
+                    {
+                        <img src="@director.FullImageUrl" alt="@director.Director" class="w-16 h-16 rounded-full object-cover mb-3" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        <div class="w-16 h-16 rounded-full bg-theme-tertiary items-center justify-center mb-3" style="display:none">
+                            <LucideIcon Name="clapperboard" Class="w-8 h-8 text-theme-secondary" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="w-16 h-16 rounded-full bg-theme-tertiary flex items-center justify-center mb-3">
+                            <LucideIcon Name="clapperboard" Class="w-8 h-8 text-theme-secondary" />
+                        </div>
+                    }
                     <span class="text-theme-primary font-medium text-sm line-clamp-2">
                         @director.Director
                     </span>
-                </div>
+                </a>
             }
         </div>
 
@@ -103,11 +112,25 @@
         <div class="quickgrid-wrapper">
             <QuickGrid Items="@FilteredDirectors.AsQueryable()" Class="quickgrid">
                 <TemplateColumn Title="" Class="w-16">
-                    <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
-                        <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
-                    </div>
+                    @if (!string.IsNullOrEmpty(context.FullImageUrl))
+                    {
+                        <img src="@context.FullImageUrl" alt="@context.Director" class="w-10 h-10 rounded-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        <div class="w-10 h-10 rounded-full bg-theme-tertiary items-center justify-center" style="display:none">
+                            <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center">
+                            <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
+                        </div>
+                    }
                 </TemplateColumn>
-                <PropertyColumn Property="@(d => d.Director)" Title="Name" Sortable="true" />
+                <TemplateColumn Title="Name" Sortable="true" SortBy="@(GridSort<DirectorResponse>.ByAscending(d => d.Director))">
+                    <a href="/directors/@context.DirectorId" class="hover:text-gold transition-colors">
+                        @context.Director
+                    </a>
+                </TemplateColumn>
                 <PropertyColumn Property="@(d => d.DirectorId)" Title="ID" Sortable="true" />
             </QuickGrid>
         </div>
