@@ -15,6 +15,7 @@ public interface IMovieApiService
 
     // Actors
     Task<List<ActorResponse>> GetActorsAsync(int skip = 0, int limit = 50);
+    Task<ActorResponse?> GetActorAsync(int actorId);
     Task<List<TopActorResponse>> GetTopActorsAsync();
     Task<List<MovieResponse>> GetActorMoviesAsync(int actorId);
 
@@ -85,6 +86,11 @@ public class MovieApiService : IMovieApiService
     public async Task<List<ActorResponse>> GetActorsAsync(int skip = 0, int limit = 50)
     {
         return await GetAsync<List<ActorResponse>>($"actors?skip={skip}&limit={limit}") ?? [];
+    }
+
+    public async Task<ActorResponse?> GetActorAsync(int actorId)
+    {
+        return await GetAsync<ActorResponse>($"actors/{actorId}");
     }
 
     public async Task<List<TopActorResponse>> GetTopActorsAsync()
