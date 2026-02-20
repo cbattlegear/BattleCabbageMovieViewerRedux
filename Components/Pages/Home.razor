@@ -114,15 +114,25 @@ else
                         <div class="space-y-3">
                             @foreach (var actor in _topActors.Take(5))
                             {
-                                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
-                                        <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
-                                    </div>
+                                <a href="/actors/@actor.ActorId" class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors no-underline">
+                                    @if (!string.IsNullOrEmpty(actor.FullImageUrl))
+                                    {
+                                        <img src="@actor.FullImageUrl" alt="@actor.Actor" class="w-10 h-10 rounded-full object-cover flex-shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                                        <div class="w-10 h-10 rounded-full bg-theme-tertiary items-center justify-center flex-shrink-0" style="display:none">
+                                            <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
+                                            <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
+                                        </div>
+                                    }
                                     <div class="flex-1 min-w-0">
                                         <span class="text-theme-primary font-medium block truncate">@actor.Actor</span>
                                         <span class="text-sm text-theme-tertiary">@actor.MovieCount movies</span>
                                     </div>
-                                </div>
+                                </a>
                             }
                         </div>
                     </div>
@@ -139,15 +149,25 @@ else
                         <div class="space-y-3">
                             @foreach (var director in _topDirectors.Take(5))
                             {
-                                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
-                                        <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
-                                    </div>
+                                <a href="/directors/@director.DirectorId" class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-tertiary transition-colors no-underline">
+                                    @if (!string.IsNullOrEmpty(director.FullImageUrl))
+                                    {
+                                        <img src="@director.FullImageUrl" alt="@director.Director" class="w-10 h-10 rounded-full object-cover flex-shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                                        <div class="w-10 h-10 rounded-full bg-theme-tertiary items-center justify-center flex-shrink-0" style="display:none">
+                                            <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center flex-shrink-0">
+                                            <LucideIcon Name="clapperboard" Class="w-5 h-5 text-theme-secondary" />
+                                        </div>
+                                    }
                                     <div class="flex-1 min-w-0">
                                         <span class="text-theme-primary font-medium block truncate">@director.Director</span>
                                         <span class="text-sm text-theme-tertiary">@director.MovieCount movies</span>
                                     </div>
-                                </div>
+                                </a>
                             }
                         </div>
                     </div>
