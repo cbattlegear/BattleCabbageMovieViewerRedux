@@ -61,9 +61,12 @@
             {
                 <div class="card p-4 flex flex-col items-center text-center cursor-pointer hover:ring-2 hover:ring-gold transition-all @(_selectedActorId == actor.ActorId ? "ring-2 ring-gold" : "")"
                      @onclick="() => ToggleActorMovies(actor)">
-                    @if (!string.IsNullOrEmpty(actor.ImageUrl))
+                    @if (!string.IsNullOrEmpty(actor.FullImageUrl))
                     {
-                        <img src="@actor.ImageUrl" alt="@actor.Actor" class="w-16 h-16 rounded-full object-cover mb-3" />
+                        <img src="@actor.FullImageUrl" alt="@actor.Actor" class="w-16 h-16 rounded-full object-cover mb-3" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        <div class="w-16 h-16 rounded-full bg-theme-tertiary items-center justify-center mb-3" style="display:none">
+                            <LucideIcon Name="user" Class="w-8 h-8 text-theme-secondary" />
+                        </div>
                     }
                     else
                     {
@@ -159,9 +162,12 @@
         <div class="quickgrid-wrapper">
             <QuickGrid Items="@FilteredActors.AsQueryable()" Class="quickgrid">
                 <TemplateColumn Title="" Class="w-16">
-                    @if (!string.IsNullOrEmpty(context.ImageUrl))
+                    @if (!string.IsNullOrEmpty(context.FullImageUrl))
                     {
-                        <img src="@context.ImageUrl" alt="@context.Actor" class="w-10 h-10 rounded-full object-cover" />
+                        <img src="@context.FullImageUrl" alt="@context.Actor" class="w-10 h-10 rounded-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                        <div class="w-10 h-10 rounded-full bg-theme-tertiary items-center justify-center" style="display:none">
+                            <LucideIcon Name="user" Class="w-5 h-5 text-theme-secondary" />
+                        </div>
                     }
                     else
                     {
