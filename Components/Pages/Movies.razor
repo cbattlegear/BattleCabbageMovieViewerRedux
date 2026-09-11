@@ -12,6 +12,8 @@
 
 @if (_selectedMovie != null)
 {
+    var trailerUrl = _selectedMovie.FullTrailerUrl;
+
     <!-- Movie Detail View -->
     <div class="min-h-screen">
         <!-- Hero Section with Clean Gradient Background -->
@@ -36,16 +38,39 @@
 
             <!-- Content -->
             <div class="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+                @if (trailerUrl != null)
+                {
+                    <div class="movie-trailer pt-8">
+                        <video @key="(_selectedMovie.MovieId, trailerUrl)"
+                               src="@trailerUrl"
+                               class="movie-trailer-player"
+                               controls playsinline preload="metadata"
+                               aria-label="@($"{_selectedMovie.Title} trailer")"
+                               @onerror="@(() => _trailerLoadFailed = true)"
+                               @onloadeddata="@(() => _trailerLoadFailed = false)">
+                            Your browser does not support embedded video.
+                            <a href="@trailerUrl" target="_blank" rel="noopener noreferrer">Open trailer video</a>
+                        </video>
+                        @if (_trailerLoadFailed)
+                        {
+                            <p class="mt-3 text-sm text-theme-secondary" role="status">
+                                The trailer could not be played.
+                                <a href="@trailerUrl" target="_blank" rel="noopener noreferrer" class="movie-trailer-link">Open trailer video in a new tab</a>.
+                            </p>
+                        }
+                    </div>
+                }
+
                 <div class="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 pt-8 pb-12">
 
-                    <!-- Poster - The visual hero -->
+                    <!-- Poster -->
                     <div class="relative group shrink-0">
                         <!-- Glow effect behind poster -->
                         <div class="absolute -inset-4 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 poster-glow"></div>
                         <div class="absolute -inset-2 rounded-2xl blur-xl poster-ambient"></div>
 
                         <!-- Poster card -->
-                        <div class="relative w-52 sm:w-56 md:w-52 lg:w-64 xl:w-72 aspect-poster rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transform transition-transform duration-300 group-hover:scale-[1.02]">
+                        <div class="relative @(trailerUrl != null ? "movie-poster-compact" : "w-52 sm:w-56 md:w-52 lg:w-64 xl:w-72") aspect-poster rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 transform transition-transform duration-300 group-hover:scale-[1.02]">
                             @if (!string.IsNullOrEmpty(_selectedMovie.FullPosterUrl))
                             {
                                 <img src="@_selectedMovie.FullPosterUrl" alt="@_selectedMovie.Title" class="w-full h-full object-cover" />
@@ -386,6 +411,7 @@ else
 
     private List<MovieResponse> _movies = [];
     private MovieResponse? _selectedMovie;
+    private bool _trailerLoadFailed;
     private bool _isLoading = true;
     private int _currentPage = 1;
     private const int PageSize = 24;
@@ -449,6 +475,7 @@ else
     private async Task LoadMovieDetail(int movieId)
     {
         _selectedMovie = await MovieApi.GetMovieAsync(movieId);
+        _trailerLoadFailed = false;
     }
 
     private async Task PreviousPage()

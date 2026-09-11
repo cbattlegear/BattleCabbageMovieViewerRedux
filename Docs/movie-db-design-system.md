@@ -682,6 +682,13 @@ Use these colors for displaying movie/show ratings:
 - Title: `--text-4xl` / `--text-5xl`, `--font-bold`
 - Metadata: `--text-base`, `--color-text-secondary`
 
+**Trailer variant:**
+- When the movie API returns a nonblank `trailer_url`, place a native video player below the back link and above the poster and title.
+- Use a responsive 16:9 player, centered at a maximum width of 960px, with controls, inline mobile playback, metadata-only preloading, and no autoplay.
+- Accept direct video URLs (such as MP4 or WebM); resolve relative paths against the movie API origin, as with posters.
+- Reduce the poster to 160px wide, or 192px at desktop widths of 1024px and above. Missing, null, or blank trailer URLs keep the existing poster layout.
+- If playback fails, show a message with a link to open the video directly. Captions require caption tracks from the backend; `trailer_url` alone does not provide them.
+
 ### Tabs
 
 ```css

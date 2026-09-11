@@ -14,6 +14,7 @@ public class MovieResponse
     public decimal? PopularityScore { get; set; }
     public string? Genre { get; set; }
     public string? PosterUrl { get; set; }
+    public string? TrailerUrl { get; set; }
     public DateTime? ReleaseDate { get; set; }
     public List<ActorResponse> Actors { get; set; } = [];
     public List<DirectorResponse> Directors { get; set; } = [];
@@ -22,6 +23,10 @@ public class MovieResponse
     public decimal? AverageScore => Reviews.Count > 0 
         ? Reviews.Where(r => r.CriticScore.HasValue).Average(r => r.CriticScore!.Value) 
         : null;
+
+    public string? FullTrailerUrl => string.IsNullOrWhiteSpace(TrailerUrl)
+        ? null
+        : GetFullMediaUrl(TrailerUrl.Trim());
 
     public string? FullPosterUrl
     {
@@ -34,12 +39,16 @@ public class MovieResponse
             if (PosterUrl == "movie_poster_url.jpeg" || PosterUrl.EndsWith("/movie_poster_url.jpeg"))
                 return PlaceholderImage;
             
-            // If it's already a full URL, return as-is
-            if (PosterUrl.StartsWith("http://") || PosterUrl.StartsWith("https://"))
-                return PosterUrl;
-            
-            // Otherwise, prepend the API base URL
-            return $"{ApiBaseUrl}/{PosterUrl.TrimStart('/')}";
+            return GetFullMediaUrl(PosterUrl);
         }
+    }
+
+    private static string GetFullMediaUrl(string url)
+    {
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        return $"{ApiBaseUrl}/{url.TrimStart('/')}";
     }
 }
