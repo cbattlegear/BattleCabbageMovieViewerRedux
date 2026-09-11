@@ -1,0 +1,41 @@
+.movie-trailer {
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.movie-trailer-player {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background-color: #000;
+    border: 1px solid var(--border-primary);
+    border-radius: 0.75rem;
+    color-scheme: dark;
+}
+
+.movie-trailer-player:focus-visible,
+.movie-trailer-link:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 4px;
+}
+
+.movie-trailer-link {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.movie-trailer-link:hover {
+    color: var(--accent-gold);
+}
+
+.movie-poster-compact {
+    width: 10rem;
+}
+
+@media (min-width: 1024px) {
+    .movie-poster-compact {
+        width: 12rem;
+    }
+}
